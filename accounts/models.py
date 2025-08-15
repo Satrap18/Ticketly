@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth import get_user_model
-from phonenumber_field.modelfields import PhoneNumberField
 # Create your models here.
 
 User = get_user_model()
@@ -11,7 +10,7 @@ class CustomUserModel(models.Model):
     tel_username = models.CharField(max_length=20, null=True, blank=True)
 
     def __str__(self):
-        return f"{self.user.username} - {int_id} - {tel_username}"
+        return f"{self.user.username} - {self.int_id} - {self.tel_username}"
 
 def profile_img(instance, filename):
     return 'user_{0}/{1}'.format(instance.user.id, filename)
