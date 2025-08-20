@@ -45,6 +45,7 @@ INSTALLED_APPS = [
 
     # My App #
     'accounts',
+    'ticket',
 
 ]
 
