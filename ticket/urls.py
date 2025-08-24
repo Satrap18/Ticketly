@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 from ticket.views import TicketViews
 
 router = DefaultRouter()
-router.register('ticket', TicketViews)
+router.register('', TicketViews)
 
 urlpatterns = [
     path('', include(router.urls)),
