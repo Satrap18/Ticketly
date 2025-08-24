@@ -1,5 +1,5 @@
 from django.contrib import admin
-from ticket.models import Tikcet
+from ticket.models import TicketModel
 # Register your models here.
 
-admin.site.register(Tikcet)
+admin.site.register(TicketModel)
