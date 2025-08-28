@@ -6,7 +6,7 @@ User = get_user_model()
 
 class CustomUserModel(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    int_id = models.IntegerField(null=True, blank=True)
+    int_id = models.IntegerField(primary_key=True, blank=True)
     tel_username = models.CharField(max_length=20, null=True, blank=True)
 
     def __str__(self):
