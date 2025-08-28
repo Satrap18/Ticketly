@@ -20,8 +20,13 @@ TOKEN = "7077726700:AAEQVdll2qPcUoGebLHjBPa00tA6J_puYns"
 async def start(update, context):
     await update.message.reply_text("Hello! The robot turned on")
 
-app = ApplicationBuilder().token(TOKEN).build()
-app.add_handler(CommandHandler("start", start))
+def main():
+    application = ApplicationBuilder().token(TOKEN).build()
 
-if __name__ == "__main__":
-    app.run_polling()
+    application.add_handler(CommandHandler("start", start))
+
+    application.run_polling()
+
+if __name__ == '__main__':
+    main()
+    
