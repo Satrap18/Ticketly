@@ -76,6 +76,7 @@ async def login_password(update, context):
         reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
         await update.message.reply_text("✅ Login successful!")
+        save_telegram_id(token, user_id)
         await update.message.reply_text("Please choose:", reply_markup=reply_markup)
         return MAIN_HANDLER
     elif not success:
