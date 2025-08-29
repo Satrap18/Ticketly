@@ -5,12 +5,12 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 class CustomUserModel(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    int_id = models.IntegerField(primary_key=True, blank=True)
-    tel_username = models.CharField(max_length=20, null=True, blank=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    telegram_id = models.BigIntegerField(null=True, blank=True, unique=True)
+    tel_username = models.CharField(max_length=50, null=True, blank=True)
 
     def __str__(self):
-        return f"{self.user.username} - {self.int_id} - {self.tel_username}"
+        return f"{self.user.username} - {self.telegram_id}"
 
 def profile_img(instance, filename):
     return 'user_{0}/{1}'.format(instance.user.id, filename)
