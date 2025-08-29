@@ -96,6 +96,16 @@ def login_and_cache(user_id, username, password):
         return True, token
     return False, None
 
+def save_telegram_id(token, telegram_id):
+    url = "http://localhost:8000/auth/set-telegram-id/"
+    headers = {"Authorization": f"Token {token}"}
+    data = {"telegram_id": telegram_id}
+    response = requests.post(url, json=data, headers=headers)
+    if response.status_code == 200:
+        print("Telegram ID saved successfully!")
+    else:
+        print("Failed to save Telegram ID:", response.json())
+
 # End Login #
 
 # Ticket & Logout #
