@@ -60,6 +60,7 @@ async def login_username(update, context):
 
 async def login_password(update, context):
     user_id = update.effective_user.id
+    tel_username = update.message.chat.username
     password = update.message.text
     username = context.user_data["username"]
 
@@ -76,7 +77,7 @@ async def login_password(update, context):
         reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
         await update.message.reply_text("✅ Login successful!")
-        save_telegram_id(token, user_id)
+        save_telegram_id(token, user_id, tel_username)
         await update.message.reply_text("Please choose:", reply_markup=reply_markup)
         return MAIN_HANDLER
     elif not success:
@@ -97,15 +98,18 @@ def login_and_cache(user_id, username, password):
         return True, token
     return False, None
 
-def save_telegram_id(token, telegram_id):
+def save_telegram_id(token, telegram_id, tel_username):
     url = "http://localhost:8000/auth/set-telegram-id/"
     headers = {"Authorization": f"Token {token}"}
-    data = {"telegram_id": telegram_id}
+    data = {"telegram_id": telegram_id, "tel_username": tel_username}
     response = requests.post(url, json=data, headers=headers)
+
     if response.status_code == 200:
         print("Telegram ID saved successfully!")
     else:
-        print("Failed to save Telegram ID:", response.json())
+        print("Failed to save Telegram ID:", response.text)
+
+
 
 # End Login #
 
