@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 TOKEN = "7077726700:AAEQVdll2qPcUoGebLHjBPa00tA6J_puYns"
 
-ACCOUNT, LOGIN, SINGUP, USERNAME, PASSWORD = range(5)
+ACCOUNT, LOGIN, SINGUP, USERNAME, PASSWORD, MAIN_HANDLER = range(6)
 token_cache = {}
 
 async def start(update, context):
@@ -63,15 +63,27 @@ async def login_password(update, context):
     password = update.message.text
     username = context.user_data["username"]
 
+    try:
+        await update.message.delete()
+        await context.bot.send_message(user_id, 'please wait...')
+    except Exception as e:
+        print("Could not delete message:", e)
+
     success, token = login_and_cache(user_id, username, password)
 
     if success:
+        keyboard = [['Ticket'], ['Logout']]
+        reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+
         await update.message.reply_text("✅ Login successful!")
-    else:
+        await update.message.reply_text("Please choose:", reply_markup=reply_markup)
+        return MAIN_HANDLER
+    elif not success:
         await update.message.reply_text("❌ Login failed. Check username/password.")
-
-    return ConversationHandler.END
-
+        await account(update, context)
+        return ACCOUNT
+    else:
+        await update.message.reply_text('Try Again Later!')
 
 def login_and_cache(user_id, username, password):
     url = 'http://localhost:8000/auth-token/'
@@ -80,11 +92,23 @@ def login_and_cache(user_id, username, password):
 
     if req.status_code == 200:
         token = req.json().get("token")
-        token_cache[user_id] = {"token": token}
+        token_cache[user_id] = {"token": token, "username": username, "password": password}
         return True, token
     return False, None
 
 # End Login #
+
+# Ticket & Logout #
+
+async def handler_main(update, context):
+    chat_id = update.effective_chat.id
+    user_id = update.effective_user.id
+    
+    if update.message.text == 'Ticket':
+        await context.bot.send_message(chat_id, 'Ticket Select!')
+    elif update.message.text == 'Logout':
+        await context.bot.send_message(chat_id, 'you logout!')
+# End Ticket & Logout #
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     await update.message.reply_text('cancelled!')
@@ -99,6 +123,7 @@ def main():
             ACCOUNT: [MessageHandler(filters.TEXT & ~filters.COMMAND, account)],
             USERNAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, login_username)],
             PASSWORD: [MessageHandler(filters.TEXT & ~filters.COMMAND, login_password)],
+            MAIN_HANDLER: [MessageHandler(filters.TEXT & ~filters.COMMAND, handler_main)],
         },
         fallbacks=[CommandHandler('cancel', cancel)],
         )
