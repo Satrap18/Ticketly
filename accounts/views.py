@@ -25,9 +25,15 @@ class SetTelegramIDView(APIView):
 
     def post(self, request, *args, **kwargs):
         telegram_id = request.data.get("telegram_id")
-        if telegram_id:
-            obj, created = CustomUserModel.objects.get_or_create(user=request.user)
-            obj.telegram_id = telegram_id
-            obj.save()
-            return Response({"status": "ok"})
-        return Response({"status": "missing telegram_id"}, status=400)
+        tel_username = request.data.get("tel_username")
+
+        if not telegram_id:
+            return Response({"status": "missing telegram_id"}, status=400)
+
+        obj, created = CustomUserModel.objects.get_or_create(user=request.user)
+        obj.telegram_id = telegram_id
+        if tel_username:
+            obj.tel_username = tel_username
+        obj.save()
+
+        return Response({"status": "ok"})
