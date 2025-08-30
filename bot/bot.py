@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 TOKEN = "7077726700:AAEQVdll2qPcUoGebLHjBPa00tA6J_puYns"
 
-ACCOUNT, LOGIN, SINGUP, USERNAME, PASSWORD, MAIN_HANDLER = range(6)
+ACCOUNT, LOGIN, SINGUP, USERNAME, PASSWORD, MAIN_HANDLER, TICKET, TICKET_COMPANY,TICKET_COMMENT, TICKET_CREATE = range(10)
 token_cache = {}
 
 async def start(update, context):
@@ -114,15 +114,63 @@ def save_telegram_id(token, telegram_id, tel_username):
 # End Login #
 
 # Ticket & Logout #
+def get_protected_data(user_id):
+    if user_id not in token_cache:
+        return "User not logged in"
+
+    token = token_cache[user_id]["token"]
+    url = "http://localhost:8000/auth/"
+    headers = {"Authorization": f"Token {token}"}
+    
+    req = requests.get(url, headers=headers)
+    if req.status_code == 200:
+        return req.json()
+    return req.text
 
 async def handler_main(update, context):
     chat_id = update.effective_chat.id
     user_id = update.effective_user.id
     
     if update.message.text == 'Ticket':
-        await context.bot.send_message(chat_id, 'Ticket Select!')
+        await context.bot.send_message(chat_id, "It's great, let's go to register the ticket")
+        await context.bot.send_message(chat_id, "Send me your company name or send skip text")
+        return TICKET
     elif update.message.text == 'Logout':
         await context.bot.send_message(chat_id, 'you logout!')
+
+async def ticket_company(update, context):
+    chat_id = update.effective_chat.id
+    company_name = update.message.text
+    
+    if company_name.lower() == 'skip':
+        company_name = "No company provided"
+    
+    context.user_data["company_name"] = company_name
+    await context.bot.send_message(chat_id, 'Now please send your comment:')
+    return TICKET_COMMENT
+
+async def ticket_comment(update, context):
+    chat_id = update.effective_chat.id
+    comment = update.message.text
+    context.user_data["comment"] = comment
+    
+    await create_ticket(update, context)
+    return TICKET_CREATE
+
+async def create_ticket(update, context):
+    chat_id = update.effective_chat.id
+    company_name = context.user_data.get("company_name", "N/A")
+    comment = context.user_data.get("comment", "No comment")
+    
+    # ticket_result = create_ticket_api(company_name, comment)
+    
+    await context.bot.send_message(chat_id, f'Ticket created!\nCompany: {company_name}\nComment: {comment}')
+    
+    context.user_data.pop("company_name", None)
+    context.user_data.pop("comment", None)
+
+
+
 # End Ticket & Logout #
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -139,6 +187,12 @@ def main():
             USERNAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, login_username)],
             PASSWORD: [MessageHandler(filters.TEXT & ~filters.COMMAND, login_password)],
             MAIN_HANDLER: [MessageHandler(filters.TEXT & ~filters.COMMAND, handler_main)],
+            TICKET: [MessageHandler(filters.TEXT & ~filters.COMMAND, ticket_company)],
+            TICKET_COMPANY: [MessageHandler(filters.TEXT & ~filters.COMMAND, ticket_company)],
+            TICKET_COMMENT: [MessageHandler(filters.TEXT & ~filters.COMMAND, ticket_comment)],
+            TICKET_CREATE: [MessageHandler(filters.TEXT & ~filters.COMMAND, create_ticket)],
+
+            
         },
         fallbacks=[CommandHandler('cancel', cancel)],
         )
