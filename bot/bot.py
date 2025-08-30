@@ -136,7 +136,7 @@ async def handler_main(update, context):
         await context.bot.send_message(chat_id, "Send me your company name or send skip text")
         return TICKET
     elif update.message.text == 'Logout':
-        await context.bot.send_message(chat_id, 'you logout!')
+        await context.bot.send_message(chat_id, 'You have been logged out!')
 
 async def ticket_company(update, context):
     chat_id = update.effective_chat.id
