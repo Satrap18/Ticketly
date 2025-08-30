@@ -173,7 +173,7 @@ async def create_ticket(update, context):
 
 # End Ticket & Logout #
 
-async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+async def cancel(update, context):
     await update.message.reply_text('cancelled!')
     return ConversationHandler.END
 
