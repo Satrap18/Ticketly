@@ -157,19 +157,53 @@ async def ticket_comment(update, context):
     await create_ticket(update, context)
     return TICKET_CREATE
 
+def get_user_profile(user_id):
+    token = token_cache[user_id]["token"]
+    url = "http://127.0.0.1:8000/auth/profile/"
+    headers = {"Authorization": f"Token {token}"}
+    req = requests.get(url, headers=headers)
+
+    if req.status_code == 200:
+        return req.json()
+    return None
+
 async def create_ticket(update, context):
     chat_id = update.effective_chat.id
+    user_id = update.effective_user.id  
     company_name = context.user_data.get("company_name", "N/A")
     comment = context.user_data.get("comment", "No comment")
     
-    # ticket_result = create_ticket_api(company_name, comment)
-    
-    await context.bot.send_message(chat_id, f'Ticket created!\nCompany: {company_name}\nComment: {comment}')
-    
-    context.user_data.pop("company_name", None)
-    context.user_data.pop("comment", None)
+    try:
+        success = create_ticket_send(user_id, company_name, comment)  # ← user_id بده
+        if success:
+            await context.bot.send_message(chat_id, 'Ticket created!')
+        else:
+            await context.bot.send_message(chat_id, 'Could not create ticket, try again later.')
+    except Exception as e:
+        await context.bot.send_message(chat_id, f'Try again later. Error: {e}')
 
 
+
+def create_ticket_send(user_id, company_name, comments):
+    token = token_cache[user_id]["token"]
+    url = "http://localhost:8000/ticket/tickets/"
+    headers = {"Authorization": f"Token {token}"}
+
+    profile = get_user_profile(user_id)
+    if not profile:
+        return False
+
+    data = {
+        "user": profile["id"],
+        "name": profile["first_name"],
+        "lastname": profile["last_name"],
+        "email": profile["email"],
+        "Company_name": company_name,
+        "comments": comments
+    }
+
+    req = requests.post(url, headers=headers, json=data)
+    return req.status_code == 201
 
 # End Ticket & Logout #
 
