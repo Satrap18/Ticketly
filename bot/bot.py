@@ -174,7 +174,7 @@ async def create_ticket(update, context):
     comment = context.user_data.get("comment", "No comment")
     
     try:
-        success = create_ticket_send(user_id, company_name, comment)  # ← user_id بده
+        success = create_ticket_send(user_id, company_name, comment)
         if success:
             await context.bot.send_message(chat_id, 'Ticket created!')
         else:
