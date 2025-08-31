@@ -37,3 +37,16 @@ class SetTelegramIDView(APIView):
         obj.save()
 
         return Response({"status": "ok"})
+
+class UserProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        return Response({
+            "id": user.id,
+            "username": user.username,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "email": user.email
+        })
