@@ -2,6 +2,7 @@ import sys
 import os
 import logging
 import requests
+from dotenv import load_dotenv
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -17,7 +18,7 @@ from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, Callb
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-TOKEN = "7077726700:AAEQVdll2qPcUoGebLHjBPa00tA6J_puYns"
+load_dotenv()
 
 (ACCOUNT, LOGIN, SINGUP, USERNAME, PASSWORD, MAIN_HANDLER, TICKET, TICKET_COMPANY,TICKET_COMMENT, TICKET_CREATE, LOGOUT,
 REGISTER_FIRSTNAME, REGISTER_LASTNAME, REGISTER_EMAIL, REGISTER_PASSWORD, REGISTER_USERNAME, REGISTER_CREATE) = range(17)
