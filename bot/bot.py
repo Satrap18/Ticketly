@@ -24,18 +24,28 @@ ACCOUNT, LOGIN, SINGUP, USERNAME, PASSWORD, MAIN_HANDLER, TICKET, TICKET_COMPANY
 token_cache = {}
 
 async def start(update, context):
+    
     chat_id = update.effective_chat.id
     user_id = update.effective_user.id
     fullname = update.message.from_user.full_name 
-    await update.message.reply_text(f"Hello {fullname}, welcome to the ticket robot")
-    keyboard = [['Login'], ['Signup']]
-    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
-    await context.bot.send_message(chat_id=chat_id,
-                                   text='Please choose:',
-                                   reply_markup=reply_markup)
-
-    return ACCOUNT
-
+    
+    if not user_id in token_cache:
+        await update.message.reply_text(f"Hello {fullname}, welcome to the ticket robot")
+        keyboard = [['Login'], ['Signup']]
+        reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+        await context.bot.send_message(chat_id=chat_id,
+                                    text='Please choose:',
+                                    reply_markup=reply_markup)
+        print("Returning ACCOUNT")
+        return ACCOUNT
+    else:
+        profile = get_user_profile(user_id)
+        if not profile:
+            return False
+        name = profile['first_name']
+        await update.message.reply_text(f'{name} You are currently logged in')
+        print("Returning MAIN_HANDLER")
+        return MAIN_HANDLER
 # Account Handler #
 
 async def account(update, context):
@@ -128,6 +138,12 @@ def get_protected_data(user_id):
         return req.json()
     return req.text
 
+async def handler_ticket_but(update, context):
+    chat_id = update.effective_chat.id
+    await context.bot.send_message(chat_id, text='Choose from the desired options')
+    return MAIN_HANDLER
+
+
 async def handler_main(update, context):
     chat_id = update.effective_chat.id
     user_id = update.effective_user.id
@@ -157,10 +173,16 @@ async def ticket_company(update, context):
 async def ticket_comment(update, context):
     chat_id = update.effective_chat.id
     comment = update.message.text
-    context.user_data["comment"] = comment
-    
-    await create_ticket(update, context)
-    return TICKET_CREATE
+
+    if len(comment) < 15:
+        await context.bot.send_message(chat_id, 'Your message is shorter than 15 words. Try again')
+        await context.bot.send_message(chat_id, text='Choose from the desired options')
+        return MAIN_HANDLER
+    else:
+        context.user_data["comment"] = comment
+        
+        await create_ticket(update, context)
+        return TICKET_CREATE
 
 def get_user_profile(user_id):
     token = token_cache[user_id]["token"]
@@ -240,7 +262,7 @@ def main():
 
             
         },
-        fallbacks=[CommandHandler('cancel', cancel)],
+        fallbacks=[CommandHandler("cancel", cancel),CommandHandler("start", start)],
         )
     
     application.add_handler(conv_handler)
