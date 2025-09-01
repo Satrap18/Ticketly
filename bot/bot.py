@@ -20,7 +20,8 @@ logger = logging.getLogger(__name__)
 TOKEN = "7077726700:AAEQVdll2qPcUoGebLHjBPa00tA6J_puYns"
 ADMIN_ID = ''
 
-ACCOUNT, LOGIN, SINGUP, USERNAME, PASSWORD, MAIN_HANDLER, TICKET, TICKET_COMPANY,TICKET_COMMENT, TICKET_CREATE, LOGOUT = range(11)
+(ACCOUNT, LOGIN, SINGUP, USERNAME, PASSWORD, MAIN_HANDLER, TICKET, TICKET_COMPANY,TICKET_COMMENT, TICKET_CREATE, LOGOUT,
+REGISTER_FIRSTNAME, REGISTER_LASTNAME, REGISTER_EMAIL, REGISTER_PASSWORD, REGISTER_USERNAME, REGISTER_CREATE) = range(17)
 token_cache = {}
 
 async def start(update, context):
@@ -57,7 +58,8 @@ async def account(update, context):
         return USERNAME
 
     elif update.message.text == 'Signup':
-        await context.bot.send_message(chat_id, 'You Select Signup')
+        await update.message.reply_text("Your FirstName:")
+        return REGISTER_FIRSTNAME
     else:
         await context.bot.send_message(chat_id, 'Please Select True Options!')
 
@@ -236,9 +238,70 @@ def create_ticket_send(user_id, company_name, comments):
 async def logout(user_id):
     if user_id in token_cache:
         del token_cache[user_id]
-
-
 # End Ticket & Logout #
+
+# Register #
+async def register_firstname(update, context):
+    context.user_data["first_name"] = update.message.text
+    await update.message.reply_text("Your LastName:")
+    return REGISTER_LASTNAME
+
+async def register_lastname(update, context):
+    context.user_data["last_name"] = update.message.text
+    await update.message.reply_text("Your Email:")
+    return REGISTER_EMAIL
+
+async def register_email(update, context):
+    context.user_data["email"] = update.message.text
+    await update.message.reply_text("Your Username:")
+    return REGISTER_USERNAME
+
+async def register_username(update, context):
+    context.user_data["username"] = update.message.text
+    await update.message.reply_text("Your Password:")
+    return REGISTER_PASSWORD
+
+async def register_password(update, context):
+    chat_id = update.effective_chat.id
+    context.user_data["password"] = update.message.text
+    await update.message.reply_text("Please wait, creating your account...")
+
+    first_name = context.user_data["first_name"]
+    last_name = context.user_data["last_name"]
+    email = context.user_data["email"]
+    username = context.user_data["username"]
+    password = context.user_data["password"]
+    
+    try:
+        success = await register_create(first_name, last_name, email, username, password)
+        if success:
+            await context.bot.send_message(chat_id, "Your account has been created successfully! \n now login your account!")
+        else:
+            await context.bot.send_message(chat_id, "I could not create the account, there is a problem, try again")
+        return ACCOUNT
+    except Exception as e:
+        await context.bot.send_message(chat_id, f"Error: {e}")
+        return ACCOUNT
+
+
+
+async def register_create(first_name, last_name, email, username, password):
+
+    url = "http://localhost:8000/auth/users/"
+
+    data = {
+        "first_name": first_name,
+        "last_name": last_name,
+        "email": email,
+        "username": username,
+        "password": password
+    }
+
+    req = requests.post(url, json=data)
+    return req.status_code == 201
+
+
+# End Register #
 
 async def cancel(update, context):
     await update.message.reply_text('cancelled!')
@@ -258,7 +321,16 @@ def main():
             TICKET_COMPANY: [MessageHandler(filters.TEXT & ~filters.COMMAND, ticket_company)],
             TICKET_COMMENT: [MessageHandler(filters.TEXT & ~filters.COMMAND, ticket_comment)],
             TICKET_CREATE: [MessageHandler(filters.TEXT & ~filters.COMMAND, create_ticket)],
-            LOGOUT: [MessageHandler(filters.TEXT & ~filters.COMMAND, logout)]
+            LOGOUT: [MessageHandler(filters.TEXT & ~filters.COMMAND, logout)],
+
+            REGISTER_FIRSTNAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, register_firstname)],
+            REGISTER_LASTNAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, register_lastname)],
+            REGISTER_EMAIL: [MessageHandler(filters.TEXT & ~filters.COMMAND, register_email)],
+            REGISTER_USERNAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, register_username)],
+            REGISTER_PASSWORD: [MessageHandler(filters.TEXT & ~filters.COMMAND, register_password)],
+            REGISTER_CREATE: [MessageHandler(filters.TEXT & ~filters.COMMAND, register_create)],
+            
+
 
             
         },
