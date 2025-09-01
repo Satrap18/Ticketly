@@ -18,8 +18,9 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 TOKEN = "7077726700:AAEQVdll2qPcUoGebLHjBPa00tA6J_puYns"
+ADMIN_ID = ''
 
-ACCOUNT, LOGIN, SINGUP, USERNAME, PASSWORD, MAIN_HANDLER, TICKET, TICKET_COMPANY,TICKET_COMMENT, TICKET_CREATE = range(10)
+ACCOUNT, LOGIN, SINGUP, USERNAME, PASSWORD, MAIN_HANDLER, TICKET, TICKET_COMPANY,TICKET_COMMENT, TICKET_CREATE, LOGOUT = range(11)
 token_cache = {}
 
 async def start(update, context):
@@ -137,6 +138,10 @@ async def handler_main(update, context):
         return TICKET
     elif update.message.text == 'Logout':
         await context.bot.send_message(chat_id, 'You have been logged out!')
+        await logout(user_id, context)
+        await start(update, context)
+        return ACCOUNT        
+
 
 async def ticket_company(update, context):
     chat_id = update.effective_chat.id
@@ -205,6 +210,12 @@ def create_ticket_send(user_id, company_name, comments):
     req = requests.post(url, headers=headers, json=data)
     return req.status_code == 201
 
+
+async def logout(user_id):
+    if user_id in token_cache:
+        del token_cache[user_id]
+
+
 # End Ticket & Logout #
 
 async def cancel(update, context):
@@ -225,6 +236,7 @@ def main():
             TICKET_COMPANY: [MessageHandler(filters.TEXT & ~filters.COMMAND, ticket_company)],
             TICKET_COMMENT: [MessageHandler(filters.TEXT & ~filters.COMMAND, ticket_comment)],
             TICKET_CREATE: [MessageHandler(filters.TEXT & ~filters.COMMAND, create_ticket)],
+            LOGOUT: [MessageHandler(filters.TEXT & ~filters.COMMAND, logout)]
 
             
         },
