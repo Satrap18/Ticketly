@@ -18,7 +18,6 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 TOKEN = "7077726700:AAEQVdll2qPcUoGebLHjBPa00tA6J_puYns"
-ADMIN_ID = ''
 
 (ACCOUNT, LOGIN, SINGUP, USERNAME, PASSWORD, MAIN_HANDLER, TICKET, TICKET_COMPANY,TICKET_COMMENT, TICKET_CREATE, LOGOUT,
 REGISTER_FIRSTNAME, REGISTER_LASTNAME, REGISTER_EMAIL, REGISTER_PASSWORD, REGISTER_USERNAME, REGISTER_CREATE) = range(17)
@@ -122,8 +121,6 @@ def save_telegram_id(token, telegram_id, tel_username):
     else:
         print("Failed to save Telegram ID:", response.text)
 
-
-
 # End Login #
 
 # Ticket & Logout #
@@ -145,7 +142,6 @@ async def handler_ticket_but(update, context):
     await context.bot.send_message(chat_id, text='Choose from the desired options')
     return MAIN_HANDLER
 
-
 async def handler_main(update, context):
     chat_id = update.effective_chat.id
     user_id = update.effective_user.id
@@ -159,7 +155,6 @@ async def handler_main(update, context):
         await logout(user_id, context)
         await start(update, context)
         return ACCOUNT        
-
 
 async def ticket_company(update, context):
     chat_id = update.effective_chat.id
@@ -211,8 +206,6 @@ async def create_ticket(update, context):
     except Exception as e:
         await context.bot.send_message(chat_id, f'Try again later. Error: {e}')
 
-
-
 def create_ticket_send(user_id, company_name, comments):
     token = token_cache[user_id]["token"]
     url = "http://localhost:8000/ticket/tickets/"
@@ -233,7 +226,6 @@ def create_ticket_send(user_id, company_name, comments):
 
     req = requests.post(url, headers=headers, json=data)
     return req.status_code == 201
-
 
 async def logout(user_id):
     if user_id in token_cache:
@@ -283,8 +275,6 @@ async def register_password(update, context):
         await context.bot.send_message(chat_id, f"Error: {e}")
         return ACCOUNT
 
-
-
 async def register_create(first_name, last_name, email, username, password):
 
     url = "http://localhost:8000/auth/users/"
@@ -299,7 +289,6 @@ async def register_create(first_name, last_name, email, username, password):
 
     req = requests.post(url, json=data)
     return req.status_code == 201
-
 
 # End Register #
 
@@ -329,9 +318,6 @@ def main():
             REGISTER_USERNAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, register_username)],
             REGISTER_PASSWORD: [MessageHandler(filters.TEXT & ~filters.COMMAND, register_password)],
             REGISTER_CREATE: [MessageHandler(filters.TEXT & ~filters.COMMAND, register_create)],
-            
-
-
             
         },
         fallbacks=[CommandHandler("cancel", cancel),CommandHandler("start", start)],
