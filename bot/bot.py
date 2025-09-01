@@ -142,7 +142,7 @@ async def handler_ticket_but(update, context):
     await context.bot.send_message(chat_id, text='Choose from the desired options')
     return MAIN_HANDLER
 
-async def handler_main(update, context):
+async def main_menu_handler(update, context):
     chat_id = update.effective_chat.id
     user_id = update.effective_user.id
     
@@ -198,7 +198,7 @@ async def create_ticket(update, context):
     comment = context.user_data.get("comment", "No comment")
     
     try:
-        success = create_ticket_send(user_id, company_name, comment)
+        success = send_ticket_request(user_id, company_name, comment)
         if success:
             await context.bot.send_message(chat_id, 'Ticket created!')
         else:
@@ -206,7 +206,7 @@ async def create_ticket(update, context):
     except Exception as e:
         await context.bot.send_message(chat_id, f'Try again later. Error: {e}')
 
-def create_ticket_send(user_id, company_name, comments):
+def send_ticket_request(user_id, company_name, comments):
     token = token_cache[user_id]["token"]
     url = "http://localhost:8000/ticket/tickets/"
     headers = {"Authorization": f"Token {token}"}
@@ -305,7 +305,7 @@ def main():
             ACCOUNT: [MessageHandler(filters.TEXT & ~filters.COMMAND, account)],
             USERNAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, login_username)],
             PASSWORD: [MessageHandler(filters.TEXT & ~filters.COMMAND, login_password)],
-            MAIN_HANDLER: [MessageHandler(filters.TEXT & ~filters.COMMAND, handler_main)],
+            MAIN_HANDLER: [MessageHandler(filters.TEXT & ~filters.COMMAND, main_menu_handler)],
             TICKET: [MessageHandler(filters.TEXT & ~filters.COMMAND, ticket_company)],
             TICKET_COMPANY: [MessageHandler(filters.TEXT & ~filters.COMMAND, ticket_company)],
             TICKET_COMMENT: [MessageHandler(filters.TEXT & ~filters.COMMAND, ticket_comment)],
