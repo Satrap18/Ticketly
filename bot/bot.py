@@ -2,6 +2,7 @@ import sys
 import os
 import logging
 import requests
+import json
 from dotenv import load_dotenv
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -237,7 +238,7 @@ async def create_ticket(update, context):
     comment = context.user_data.get("comment", "No comment")
     
     try:
-        success = send_ticket_request(user_id, company_name, comment)
+        success = await send_ticket_request(user_id, update, context, company_name, comment)
         if success:
             await context.bot.send_message(chat_id, 'Ticket created!')
             return MAIN_HANDLER
@@ -249,7 +250,7 @@ async def create_ticket(update, context):
         return MAIN_HANDLER
 
 
-def send_ticket_request(user_id, company_name, comments):
+async def send_ticket_request(user_id, update, context, company_name, comments):
     token = token_cache[user_id]["token"]
     url = "http://localhost:8000/ticket/tickets/"
     headers = {"Authorization": f"Token {token}"}
@@ -268,6 +269,19 @@ def send_ticket_request(user_id, company_name, comments):
     }
 
     req = requests.post(url, headers=headers, json=data)
+    data = json.loads(req.text)
+    await context.bot.send_message(
+    ADMIN_ID,
+    f"🎫 *New Ticket Request*\n\n"
+    f"👤 *Name:* {data['name']} {data['lastname']}\n"
+    f"📧 *Email:* {data['email']}\n"
+    f"🏢 *Company:* {data['Company_name']}\n"
+    f"📅 *Date:* {data['date']}\n"
+    f"💬 *Comments:* {data['comments']}\n\n"
+    f"🆔 *User ID:* {data['user']}\n"
+    f"🆔 *Ticket ID:* {data['id']}",
+    parse_mode='Markdown'
+    )
     return req.status_code == 201
 
 async def logout(user_id):
