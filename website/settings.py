@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     # Another App #
     'rest_framework',
     'rest_framework.authtoken',
-    'rest_framework_swagger',
+    'drf_spectacular',
 
     # My App #
     'accounts',
@@ -147,5 +147,6 @@ REST_FRAMEWORK = {
 
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
-    ]
+    ],
+    
 }
