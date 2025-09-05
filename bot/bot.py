@@ -19,6 +19,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 load_dotenv()
+TOKEN = os.getenv('TOKEN')
 
 (ACCOUNT, LOGIN, SINGUP, USERNAME, PASSWORD, MAIN_HANDLER, TICKET, TICKET_COMPANY,TICKET_COMMENT, TICKET_CREATE, LOGOUT,
 REGISTER_FIRSTNAME, REGISTER_LASTNAME, REGISTER_EMAIL, REGISTER_PASSWORD, REGISTER_USERNAME, REGISTER_CREATE) = range(17)
@@ -153,9 +154,8 @@ async def main_menu_handler(update, context):
         return TICKET
     elif update.message.text == 'Logout':
         await context.bot.send_message(chat_id, 'You have been logged out!')
-        await logout(user_id, context)
-        await start(update, context)
-        return ACCOUNT        
+        await logout(user_id)
+        return await start(update, context) 
 
 async def ticket_company(update, context):
     chat_id = update.effective_chat.id
@@ -202,10 +202,14 @@ async def create_ticket(update, context):
         success = send_ticket_request(user_id, company_name, comment)
         if success:
             await context.bot.send_message(chat_id, 'Ticket created!')
+            return MAIN_HANDLER
         else:
             await context.bot.send_message(chat_id, 'Could not create ticket, try again later.')
+            return MAIN_HANDLER
     except Exception as e:
         await context.bot.send_message(chat_id, f'Try again later. Error: {e}')
+        return MAIN_HANDLER
+
 
 def send_ticket_request(user_id, company_name, comments):
     token = token_cache[user_id]["token"]
