@@ -273,21 +273,33 @@ async def register_firstname(update, context):
 
 
 async def register_lastname(update, context):
+    if update.message.text == 'Back':
+        return await start(update, context)
+
     context.user_data["last_name"] = update.message.text
     await update.message.reply_text("Your Email:")
     return REGISTER_EMAIL
 
 async def register_email(update, context):
+    if update.message.text == 'Back':
+        return await start(update, context)
+        
     context.user_data["email"] = update.message.text
     await update.message.reply_text("Your Username:")
     return REGISTER_USERNAME
 
 async def register_username(update, context):
+    if update.message.text == 'Back':
+        return await start(update, context)
+
     context.user_data["username"] = update.message.text
     await update.message.reply_text("Your Password:")
     return REGISTER_PASSWORD
 
 async def register_password(update, context):
+    if update.message.text == 'Back':
+        return await start(update, context)
+
     chat_id = update.effective_chat.id
     context.user_data["password"] = update.message.text
     await update.message.reply_text("Please wait, creating your account...")
