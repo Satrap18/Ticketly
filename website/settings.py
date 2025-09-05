@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     # Another App #
     'rest_framework',
     'rest_framework.authtoken',
+    'rest_framework_swagger',
 
     # My App #
     'accounts',
