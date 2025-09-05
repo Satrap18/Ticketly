@@ -166,17 +166,25 @@ async def main_menu_handler(update, context):
     if update.message.text == 'Ticket':
         await context.bot.send_message(chat_id, "It's great, let's go to register the ticket", reply_markup=reply_markup)
         await context.bot.send_message(chat_id, "Send me your company name or send skip text")
-        if update.message.text == 'Back':
-            return await main_menu_handler(update, context)
-        else:
-            return TICKET
+        return TICKET
     elif update.message.text == 'Logout':
         await context.bot.send_message(chat_id, 'You have been logged out!')
         await logout(user_id)
         return await start(update, context) 
+    elif update.message.text == 'Back':
+        await context.bot.send_message(chat_id, 'Back to main menu!')
+        return MAIN_HANDLER 
 
 async def ticket_company(update, context):
+
     chat_id = update.effective_chat.id
+    
+    if update.message.text == 'Back':
+        keyboard = [['Ticket'], ['Logout']]
+        reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+        await update.message.reply_text("Please choose:", reply_markup=reply_markup)
+        return MAIN_HANDLER
+
     company_name = update.message.text
     
     if company_name.lower() == 'skip':
@@ -191,10 +199,15 @@ async def ticket_company(update, context):
 
 async def ticket_comment(update, context):
     chat_id = update.effective_chat.id
+    
+    if update.message.text == 'Back':
+        keyboard = [['Ticket'], ['Logout']]
+        reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+        await update.message.reply_text("Please choose:", reply_markup=reply_markup)
+        return MAIN_HANDLER
+
     comment = update.message.text
 
-    if update.message.text == 'Back':
-        return await main_menu_handler(update, context)
 
     if len(comment) < 15:
         await context.bot.send_message(chat_id, 'Your message is shorter than 15 words. Try again')
