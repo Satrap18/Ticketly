@@ -283,7 +283,7 @@ async def register_lastname(update, context):
 async def register_email(update, context):
     if update.message.text == 'Back':
         return await start(update, context)
-        
+
     context.user_data["email"] = update.message.text
     await update.message.reply_text("Your Username:")
     return REGISTER_USERNAME
