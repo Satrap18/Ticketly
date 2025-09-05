@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 TOKEN = os.getenv('TOKEN')
+ADMIN_ID = os.getenv('ADMIN')
 
 (ACCOUNT, LOGIN, SINGUP, USERNAME, PASSWORD, MAIN_HANDLER, TICKET, TICKET_COMPANY,TICKET_COMMENT, TICKET_CREATE, LOGOUT,
 REGISTER_FIRSTNAME, REGISTER_LASTNAME, REGISTER_EMAIL, REGISTER_PASSWORD, REGISTER_USERNAME, REGISTER_CREATE) = range(17)
@@ -351,6 +352,11 @@ async def register_create(first_name, last_name, email, username, password):
 
 # End Register #
 
+# Answer Ticket #
+
+
+
+# End Answer Ticket #
 async def cancel(update, context):
     await update.message.reply_text('cancelled!')
     return ConversationHandler.END
