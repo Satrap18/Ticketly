@@ -54,12 +54,15 @@ async def account(update, context):
     chat_id = update.effective_chat.id
     user_id = update.effective_user.id
 
+    keyboard = [['Back']]
+    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+
     if update.message.text == 'Login':
-        await context.bot.send_message(chat_id, 'Your Username Account:')
+        await context.bot.send_message(chat_id, 'Your Username Account:', reply_markup=reply_markup)
         return USERNAME
 
     elif update.message.text == 'Signup':
-        await update.message.reply_text("Your FirstName:")
+        await update.message.reply_text("Your FirstName:", reply_markup=reply_markup)
         return REGISTER_FIRSTNAME
     else:
         await context.bot.send_message(chat_id, 'Please Select True Options!')
@@ -68,11 +71,19 @@ async def account(update, context):
 
 # Login #
 async def login_username(update, context):
+    if update.message.text == 'Back':
+        return await start(update, context)
+    
     context.user_data["username"] = update.message.text
     await update.message.reply_text("Your Password Account:")
+    
     return PASSWORD
 
 async def login_password(update, context):
+
+    if update.message.text == 'Back':
+        return await start(update, context)
+
     user_id = update.effective_user.id
     tel_username = update.message.chat.username
     password = update.message.text
@@ -147,11 +158,18 @@ async def handler_ticket_but(update, context):
 async def main_menu_handler(update, context):
     chat_id = update.effective_chat.id
     user_id = update.effective_user.id
+
+    keyboard = [['Back']]
+    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+
     
     if update.message.text == 'Ticket':
-        await context.bot.send_message(chat_id, "It's great, let's go to register the ticket")
+        await context.bot.send_message(chat_id, "It's great, let's go to register the ticket", reply_markup=reply_markup)
         await context.bot.send_message(chat_id, "Send me your company name or send skip text")
-        return TICKET
+        if update.message.text == 'Back':
+            return await main_menu_handler(update, context)
+        else:
+            return TICKET
     elif update.message.text == 'Logout':
         await context.bot.send_message(chat_id, 'You have been logged out!')
         await logout(user_id)
@@ -164,17 +182,23 @@ async def ticket_company(update, context):
     if company_name.lower() == 'skip':
         company_name = "No company provided"
     
+    keyboard = [['Back']]
+    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+
     context.user_data["company_name"] = company_name
-    await context.bot.send_message(chat_id, 'Now please send your comment:')
+    await context.bot.send_message(chat_id, 'Now please send your comment:', reply_markup=reply_markup)
     return TICKET_COMMENT
 
 async def ticket_comment(update, context):
     chat_id = update.effective_chat.id
     comment = update.message.text
 
+    if update.message.text == 'Back':
+        return await main_menu_handler(update, context)
+
     if len(comment) < 15:
         await context.bot.send_message(chat_id, 'Your message is shorter than 15 words. Try again')
-        await context.bot.send_message(chat_id, text='Choose from the desired options')
+        await context.bot.send_message(chat_id, 'Choose from the desired options')
         return MAIN_HANDLER
     else:
         context.user_data["comment"] = comment
@@ -239,9 +263,14 @@ async def logout(user_id):
 
 # Register #
 async def register_firstname(update, context):
+    if update.message.text == 'Back':
+        return await start(update, context)
+    
     context.user_data["first_name"] = update.message.text
     await update.message.reply_text("Your LastName:")
+    
     return REGISTER_LASTNAME
+
 
 async def register_lastname(update, context):
     context.user_data["last_name"] = update.message.text
