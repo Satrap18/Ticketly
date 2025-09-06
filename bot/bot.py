@@ -24,7 +24,8 @@ TOKEN = os.getenv('TOKEN')
 ADMIN_ID = os.getenv('ADMIN')
 
 (ACCOUNT, LOGIN, SINGUP, USERNAME, PASSWORD, MAIN_HANDLER, TICKET, TICKET_COMPANY,TICKET_COMMENT, TICKET_CREATE, LOGOUT,
-REGISTER_FIRSTNAME, REGISTER_LASTNAME, REGISTER_EMAIL, REGISTER_PASSWORD, REGISTER_USERNAME, REGISTER_CREATE) = range(17)
+REGISTER_FIRSTNAME, REGISTER_LASTNAME, REGISTER_EMAIL, REGISTER_PASSWORD, REGISTER_USERNAME, REGISTER_CREATE,
+SEND_ANSWER, ID_TICKET, SUBJECT, MESSAGE, ADMIN_HANDLER) = range(22)
 token_cache = {}
 
 async def start(update, context):
@@ -107,6 +108,7 @@ async def login_password(update, context):
         save_telegram_id(token, user_id, tel_username)
         await update.message.reply_text("Please choose:", reply_markup=reply_markup)
         return MAIN_HANDLER
+
     elif not success:
         await update.message.reply_text("❌ Login failed. Check username/password.")
         await account(update, context)
@@ -172,10 +174,18 @@ async def main_menu_handler(update, context):
     elif update.message.text == 'Logout':
         await context.bot.send_message(chat_id, 'You have been logged out!')
         await logout(user_id)
-        return await start(update, context) 
+        return await start(update, context)             
     elif update.message.text == 'Back':
         await context.bot.send_message(chat_id, 'Back to main menu!')
-        return MAIN_HANDLER 
+        return MAIN_HANDLER
+    elif update.message.text == 'Answer':
+        await context.bot.send_message(chat_id, 'Hi, Admin!')
+        await context.bot.send_message(chat_id, 'send ticket id')
+        return ID_TICKET
+    else:
+        await context.bot.send_message(chat_id, 'Please Select True Options!')
+        
+
 
 async def ticket_company(update, context):
 
@@ -213,7 +223,9 @@ async def ticket_comment(update, context):
 
     if len(comment) < 15:
         await context.bot.send_message(chat_id, 'Your message is shorter than 15 words. Try again')
-        await context.bot.send_message(chat_id, 'Choose from the desired options')
+        keyboard = [['Ticket'], ['Logout']]
+        reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+        await update.message.reply_text("Please choose:", reply_markup=reply_markup)
         return MAIN_HANDLER
     else:
         context.user_data["comment"] = comment
@@ -279,7 +291,9 @@ async def send_ticket_request(user_id, update, context, company_name, comments):
     f"📅 *Date:* {data['date']}\n"
     f"💬 *Comments:* {data['comments']}\n\n"
     f"🆔 *User ID:* {data['user']}\n"
-    f"🆔 *Ticket ID:* {data['id']}",
+    f"🆔 *Ticket ID:* {data['id']}"
+    
+    f"🆔 *User ID:* {user_id}",
     parse_mode='Markdown'
     )
     return req.status_code == 201
@@ -367,8 +381,106 @@ async def register_create(first_name, last_name, email, username, password):
 # End Register #
 
 # Answer Ticket #
+# ANSWER_HANDLER, ID_TICKET, SUBJECT, MESSAGE
+async def admin_handler(update, context):
+    
+    if update.message.text == 'Answer':
+        await context.bot.send_message(chat_id, 'Hi, Admin!')
+        await context.bot.send_message(chat_id, 'send ticket id')
+        return ID_TICKET
+    elif update.message.text == 'Logout':
+        await context.bot.send_message(chat_id, 'You have been logged out!')
+        await logout(user_id)
+        return await start(update, context)
+
+    elif update.message.text == 'Back':
+        await context.bot.send_message(chat_id, 'Back to main menu!')
+        return MAIN_HANDLER
+    else:
+        await context.bot.send_message(chat_id, 'Please Select True Options!')
 
 
+# async def admin_handler(update, context):
+#     chat_id = update.effective_chat.id
+#     text = update.message.text
+
+#     if text == 'Answer':
+#         await context.bot.send_message(chat_id, "Send ticket id")
+#         return ID_TICKET
+#     elif text == 'Logout':
+#         await context.bot.send_message(chat_id, "You logged out!", reply_markup=ReplyKeyboardRemove())
+#         return await start(update, context)
+#     else:
+#         await context.bot.send_message(chat_id, "Please choose a valid option")
+#         return ADMIN_HANDLER
+
+        
+
+async def id_ticket(update, context):
+
+    chat_id = update.effective_chat.id
+
+    if update.message.text == 'Back':
+        keyboard = [['Answer'], ['Logout']]
+        reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+        await update.message.reply_text("Please choose:", reply_markup=reply_markup)
+        return MAIN_HANDLER
+
+    context.user_data["id_ticket_number"] = update.message.text
+    await context.bot.send_message(chat_id, 'now send subject')
+    return SUBJECT
+
+async def subjcet(update, context):
+
+    chat_id = update.effective_chat.id
+
+    if update.message.text == 'Back':
+        keyboard = [['Answer'], ['Logout']]
+        reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+        await update.message.reply_text("Please choose:", reply_markup=reply_markup)
+        return MAIN_HANDLER
+
+    context.user_data["subject_text"] = update.message.text
+    await context.bot.send_message(chat_id, 'now send your message')
+    return MESSAGE
+
+async def message(update, context):
+    
+    chat_id = update.effective_chat.id
+
+    if update.message.text == 'Back':
+        keyboard = [['Answer'], ['Logout']]
+        reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+        await update.message.reply_text("Please choose:", reply_markup=reply_markup)
+        return MAIN_HANDLER
+
+    context.user_data["message_text"] = update.message.text
+    await context.bot.send_message(chat_id, 'send telegram id user')
+    return SEND_ANSWER
+
+async def send_answer(update, context):
+
+    user_id = update.effective_user.id
+    id_tic = context.user_data["id_ticket_number"]
+    subject_answer = context.user_data["subject_text"]
+    message_answer = context.user_data["message_text"]
+    id_number_tel = update.message.text
+
+    token = token_cache[user_id]["token"]
+    url = "http://localhost:8000/ticket/answers/"
+    headers = {"Authorization": f"Token {token}"}
+
+    data = {
+        "ticket": id_tic,
+        "subject": subject_answer,
+        "message_text": message_answer,
+    }
+
+    req = requests.post(url, headers=headers, json=data)
+    if req.status_code == 201:
+        await context.bot.send_message(id_number_tel, text=f'Admin Answer:{message_answer}')
+    else:
+        await context.bot.send_message(ADMIN_ID, 'Erorr!')
 
 # End Answer Ticket #
 async def cancel(update, context):
@@ -397,6 +509,16 @@ def main():
             REGISTER_USERNAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, register_username)],
             REGISTER_PASSWORD: [MessageHandler(filters.TEXT & ~filters.COMMAND, register_password)],
             REGISTER_CREATE: [MessageHandler(filters.TEXT & ~filters.COMMAND, register_create)],
+
+            ID_TICKET: [MessageHandler(filters.TEXT & ~filters.COMMAND, id_ticket)],
+            SUBJECT: [MessageHandler(filters.TEXT & ~filters.COMMAND, subjcet)],
+            MESSAGE: [MessageHandler(filters.TEXT & ~filters.COMMAND, message)],
+            SEND_ANSWER: [MessageHandler(filters.TEXT & ~filters.COMMAND, send_answer)],
+            ADMIN_HANDLER: [MessageHandler(filters.TEXT & ~filters.COMMAND, admin_handler)],
+            
+
+            
+            #, ID_TICKET, SUBJECT, MESSAGE
             
         },
         fallbacks=[CommandHandler("cancel", cancel),CommandHandler("start", start)],
