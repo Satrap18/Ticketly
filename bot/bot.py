@@ -516,10 +516,6 @@ def main():
             SEND_ANSWER: [MessageHandler(filters.TEXT & ~filters.COMMAND, send_answer)],
             ADMIN_HANDLER: [MessageHandler(filters.TEXT & ~filters.COMMAND, admin_handler)],
             
-
-            
-            #, ID_TICKET, SUBJECT, MESSAGE
-            
         },
         fallbacks=[CommandHandler("cancel", cancel),CommandHandler("start", start)],
         )
