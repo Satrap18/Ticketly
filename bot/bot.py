@@ -397,24 +397,7 @@ async def admin_handler(update, context):
         await context.bot.send_message(chat_id, 'Back to main menu!')
         return MAIN_HANDLER
     else:
-        await context.bot.send_message(chat_id, 'Please Select True Options!')
-
-
-# async def admin_handler(update, context):
-#     chat_id = update.effective_chat.id
-#     text = update.message.text
-
-#     if text == 'Answer':
-#         await context.bot.send_message(chat_id, "Send ticket id")
-#         return ID_TICKET
-#     elif text == 'Logout':
-#         await context.bot.send_message(chat_id, "You logged out!", reply_markup=ReplyKeyboardRemove())
-#         return await start(update, context)
-#     else:
-#         await context.bot.send_message(chat_id, "Please choose a valid option")
-#         return ADMIN_HANDLER
-
-        
+        await context.bot.send_message(chat_id, 'Please Select True Options!')   
 
 async def id_ticket(update, context):
 
