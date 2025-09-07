@@ -33,41 +33,47 @@ Users can create tickets via the Telegram bot, and admins can respond either thr
 # 1. Clone the project
 git clone https://github.com/Satrap18/Ticketly.git
 cd Ticketly
+```
 
 # 2. Create virtual environment
+```bash
 python -m venv venv
 source venv/bin/activate   # Linux
 venv\Scripts\activate      # Windows
+```
 
 # 3. Install dependencies
+```bash
 pip install -r requirements.txt
-
+```
 # 4. Apply migrations
+```bash
 python manage.py migrate
-
+```
 # 5. Create superuser
+```bash
 python manage.py createsuperuser
-
+```
 # 6. Run the project
+```bash
 python manage.py runserver
-
+```
 
 ---
-
 ## 🤖 Telegram Bot Setup
 
-1. Create a new bot via [BotFather](https://t.me/botfather)  
+Follow these steps to configure your Telegram bot:
 
+1. **Create a new bot** via [BotFather](https://t.me/botfather)  
+   - Send `/newbot` and follow instructions.
+   - Copy the generated **bot token**.
 
+2. **Save your bot token and admin ID** in a `.env` file at the root of the project:
 
-2. Save your bot token inside `.env`:
-
-TOKEN=xxxxxx
-ADMIN_ID=xxxxx
-
-3. Configure webhook or polling to start receiving updates.
-
-
+```env
+TOKEN=YOUR_BOT_TOKEN_HERE
+ADMIN_ID=YOUR_TELEGRAM_USER_ID
+```
 ---
 
 📖 API Documentation
@@ -84,9 +90,10 @@ OpenAPI Schema → http://127.0.0.1:8000/api/schema/
 
 📸 Screenshots
 
-(img\auth.png)
-(img\ticket.png)
-(img\schemas.png)
+
+![Auth Screen](img/auth.png)
+![Ticket Screen](img/ticket.png)
+![API Schemas](img/schemas.png)
 
 
 ---
