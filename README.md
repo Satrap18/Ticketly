@@ -84,7 +84,9 @@ OpenAPI Schema → http://127.0.0.1:8000/api/schema/
 
 📸 Screenshots
 
-(Add screenshots or GIFs from the bot and Swagger UI here)
+(img\auth.png)
+(img\ticket.png)
+(img\schemas.png)
 
 
 ---
