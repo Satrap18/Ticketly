@@ -3,3 +3,4 @@ python-telegram-bot
 requests
 python-dotenv
 django-rest-swagger
+drf-spectacular
