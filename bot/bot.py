@@ -61,14 +61,14 @@ async def account(update, context):
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
     if update.message.text == 'Login':
-        await context.bot.send_message(chat_id, 'Your Username Account:', reply_markup=reply_markup)
+        await context.bot.send_message(chat_id, 'Your username:', reply_markup=reply_markup)
         return USERNAME
 
     elif update.message.text == 'Signup':
         await update.message.reply_text("Your FirstName:", reply_markup=reply_markup)
         return REGISTER_FIRSTNAME
     else:
-        await context.bot.send_message(chat_id, 'Please Select True Options!')
+        await context.bot.send_message(chat_id, 'Please select a valid option')
 
 # End Account Handler #
 
@@ -78,7 +78,7 @@ async def login_username(update, context):
         return await start(update, context)
     
     context.user_data["username"] = update.message.text
-    await update.message.reply_text("Your Password Account:")
+    await update.message.reply_text("Your password:")
     
     return PASSWORD
 
@@ -167,23 +167,23 @@ async def main_menu_handler(update, context):
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
     
-    if update.message.text == 'Ticket':
-        await context.bot.send_message(chat_id, "It's great, let's go to register the ticket", reply_markup=reply_markup)
-        await context.bot.send_message(chat_id, "Send me your company name or send skip text")
+    if text == 'Ticket':
+        await context.bot.send_message(chat_id=chat_id, text="Great — let's register your ticket", reply_markup=reply_markup)
+        await context.bot.send_message(chat_id=chat_id, text="Send your company name or type 'skip'")
         return TICKET
-    elif update.message.text == 'Logout':
-        await context.bot.send_message(chat_id, 'You have been logged out!')
-        await logout(user_id)
-        return await start(update, context)             
-    elif update.message.text == 'Back':
-        await context.bot.send_message(chat_id, 'Back to main menu!')
+    elif text == 'Logout':
+        await logout_handler(update, context)
+        return await start(update, context)
+    elif text == 'Back':
+        await context.bot.send_message(chat_id=chat_id, text='Back to main menu.')
         return MAIN_HANDLER
-    elif update.message.text == 'Answer':
-        await context.bot.send_message(chat_id, 'Hi, Admin!')
-        await context.bot.send_message(chat_id, 'send ticket id')
+    elif text == 'Answer':
+        await context.bot.send_message(chat_id=chat_id, text='Hi, Admin!')
+        await context.bot.send_message(chat_id=chat_id, text='Send ticket ID:')
         return ID_TICKET
     else:
-        await context.bot.send_message(chat_id, 'Please Select True Options!')
+        await context.bot.send_message(chat_id=chat_id, text='Please select a valid option!')
+        return MAIN_HANDLER
         
 
 
@@ -308,8 +308,11 @@ async def send_ticket_request(user_id, update, context, company_name, comments):
     return req.status_code == 201
 
 async def logout(user_id):
-    if user_id in token_cache:
-        del token_cache[user_id]
+    chat_id = update.effective_chat.id
+    user_id = update.effective_user.id
+    token_cache.pop(user_id, None)
+    await context.bot.send_message(chat_id=chat_id, text='You have been logged out.')
+    return ACCOUNT
 # End Ticket & Logout #
 
 # Register #
@@ -408,7 +411,7 @@ async def admin_handler(update, context):
     
     if update.message.text == 'Answer':
         await context.bot.send_message(chat_id, 'Hi, Admin!')
-        await context.bot.send_message(chat_id, 'send ticket id')
+        await context.bot.send_message(chat_id, 'Send ticket ID:')
         return ID_TICKET
     elif update.message.text == 'Logout':
         await context.bot.send_message(chat_id, 'You have been logged out!')
@@ -419,7 +422,7 @@ async def admin_handler(update, context):
         await context.bot.send_message(chat_id, 'Back to main menu!')
         return MAIN_HANDLER
     else:
-        await context.bot.send_message(chat_id, 'Please Select True Options!')   
+        await context.bot.send_message(chat_id, 'Please select a valid option!')   
 
 async def id_ticket(update, context):
 
@@ -432,7 +435,7 @@ async def id_ticket(update, context):
         return MAIN_HANDLER
 
     context.user_data["id_ticket_number"] = update.message.text
-    await context.bot.send_message(chat_id, 'now send subject')
+    await context.bot.send_message(chat_id, 'Now send subject:')
     return SUBJECT
 
 async def subjcet(update, context):
@@ -460,7 +463,7 @@ async def message(update, context):
         return MAIN_HANDLER
 
     context.user_data["message_text"] = update.message.text
-    await context.bot.send_message(chat_id, 'send telegram id user')
+    await context.bot.send_message(chat_id, 'Send Telegram ID of the user to receive the answer:')
     return SEND_ANSWER
 
 async def send_answer(update, context):
