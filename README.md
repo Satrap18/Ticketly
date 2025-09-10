@@ -88,7 +88,7 @@ OpenAPI Schema → http://127.0.0.1:8000/api/schema/
 🎥 Demo  
 ![Signup Demo](img/signup.gif)  
 ![Login Demo](img/login.gif)  
-![Ticket Demo](img/ticket.gif)  
+![Ticket Demo](img/ticket.gif)   
 ![Answer Demo](img/answer.gif) 
 
 
