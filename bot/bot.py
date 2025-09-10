@@ -35,7 +35,7 @@ async def start(update, context):
     fullname = update.message.from_user.full_name 
     
     if not user_id in token_cache:
-        await update.message.reply_text(f"Hello {fullname}, welcome to the ticket robot")
+        await update.message.reply_text(f"Hello {fullname}, welcome to Ticketly Bot 👋\nYou can create support tickets and get answers from admins here.")
         keyboard = [['Login'], ['Signup']]
         reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
         await context.bot.send_message(chat_id=chat_id,
@@ -94,7 +94,7 @@ async def login_password(update, context):
 
     try:
         await update.message.delete()
-        await context.bot.send_message(user_id, 'please wait...')
+        await context.bot.send_message(user_id, '🔑 Authenticating, please wait...')
     except Exception as e:
         print("Could not delete message:", e)
 
@@ -104,13 +104,13 @@ async def login_password(update, context):
         keyboard = [['Ticket'], ['Logout']]
         reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
-        await update.message.reply_text("✅ Login successful!")
+        await update.message.reply_text("✅ You are logged in successfully!")
         save_telegram_id(token, user_id, tel_username)
         await update.message.reply_text("Please choose:", reply_markup=reply_markup)
         return MAIN_HANDLER
 
     elif not success:
-        await update.message.reply_text("❌ Login failed. Check username/password.")
+        await update.message.reply_text("❌ Login failed. Please check your username and password, then try again.")
         await account(update, context)
         return ACCOUNT
     else:
@@ -162,7 +162,7 @@ async def handler_ticket_but(update, context):
 async def main_menu_handler(update, context):
     chat_id = update.effective_chat.id
     user_id = update.effective_user.id
-
+    text = update.message.text
     keyboard = [['Back']]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
@@ -172,7 +172,7 @@ async def main_menu_handler(update, context):
         await context.bot.send_message(chat_id=chat_id, text="Send your company name or type 'skip'")
         return TICKET
     elif text == 'Logout':
-        await logout_handler(update, context)
+        await logout(update, context)
         return await start(update, context)
     elif text == 'Back':
         await context.bot.send_message(chat_id=chat_id, text='Back to main menu.')
@@ -206,7 +206,7 @@ async def ticket_company(update, context):
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
     context.user_data["company_name"] = company_name
-    await context.bot.send_message(chat_id, 'Now please send your comment:', reply_markup=reply_markup)
+    await context.bot.send_message(chat_id, '📝 Now please describe your issue in detail:', reply_markup=reply_markup)
     return TICKET_COMMENT
 
 async def ticket_comment(update, context):
@@ -222,7 +222,7 @@ async def ticket_comment(update, context):
 
 
     if len(comment) < 15:
-        await context.bot.send_message(chat_id, 'Your message is shorter than 15 words. Try again')
+        await context.bot.send_message(chat_id, '⚠️ Your message is too short. Please provide at least 15 characters.')
         keyboard = [['Ticket'], ['Logout']]
         reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
         await update.message.reply_text("Please choose:", reply_markup=reply_markup)
@@ -252,13 +252,13 @@ async def create_ticket(update, context):
     try:
         success = await send_ticket_request(user_id, update, context, company_name, comment)
         if success:
-            await context.bot.send_message(chat_id, 'Ticket created!')
+            await context.bot.send_message(chat_id, '🎫 Your ticket has been created successfully. An admin will reply soon.')
             keyboard = [['Ticket'], ['Logout']]
             reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
             await update.message.reply_text("Please choose:", reply_markup=reply_markup)
             return MAIN_HANDLER
         else:
-            await context.bot.send_message(chat_id, 'Could not create ticket, try again later.')
+            await context.bot.send_message(chat_id, '❌ Failed to create ticket. Please try again later.')
             keyboard = [['Ticket'], ['Logout']]
             reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
             await update.message.reply_text("Please choose:", reply_markup=reply_markup)            
@@ -307,9 +307,9 @@ async def send_ticket_request(user_id, update, context, company_name, comments):
     )
     return req.status_code == 201
 
-async def logout(user_id):
-    chat_id = update.effective_chat.id
+async def logout(update, context):
     user_id = update.effective_user.id
+    chat_id = update.effective_chat.id
     token_cache.pop(user_id, None)
     await context.bot.send_message(chat_id=chat_id, text='You have been logged out.')
     return ACCOUNT
@@ -368,7 +368,7 @@ async def register_password(update, context):
         success = await register_create(first_name, last_name, email, username, password)
         if success:
             await update.message.delete()
-            await context.bot.send_message(chat_id, "Your account has been created successfully! \n now login your account!")
+            await context.bot.send_message(chat_id, "🎉 Your account has been created successfully!\n👉 Please login to continue.")
             keyboard = [['Login'], ['Signup']]
             reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
             await context.bot.send_message(chat_id=chat_id,
@@ -376,7 +376,7 @@ async def register_password(update, context):
                                     reply_markup=reply_markup)
             return ACCOUNT 
         else:
-            await context.bot.send_message(chat_id, "I could not create the account, there is a problem, try again")
+            await context.bot.send_message(chat_id, "❌ Could not create your account. Please check your information and try again.")
             keyboard = [['Login'], ['Signup']]
             reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
             await context.bot.send_message(chat_id=chat_id,
@@ -415,7 +415,7 @@ async def admin_handler(update, context):
         return ID_TICKET
     elif update.message.text == 'Logout':
         await context.bot.send_message(chat_id, 'You have been logged out!')
-        await logout(user_id)
+        await logout(update, context)
         return await start(update, context)
 
     elif update.message.text == 'Back':
@@ -438,7 +438,7 @@ async def id_ticket(update, context):
     await context.bot.send_message(chat_id, 'Now send subject:')
     return SUBJECT
 
-async def subjcet(update, context):
+async def subject(update, context):
 
     chat_id = update.effective_chat.id
 
@@ -449,7 +449,7 @@ async def subjcet(update, context):
         return MAIN_HANDLER
 
     context.user_data["subject_text"] = update.message.text
-    await context.bot.send_message(chat_id, 'now send your message')
+    await context.bot.send_message(chat_id, '💬 Now type your message for the user:')
     return MESSAGE
 
 async def message(update, context):
@@ -463,7 +463,7 @@ async def message(update, context):
         return MAIN_HANDLER
 
     context.user_data["message_text"] = update.message.text
-    await context.bot.send_message(chat_id, 'Send Telegram ID of the user to receive the answer:')
+    await context.bot.send_message(chat_id, '📩 Finally, please send the Telegram ID of the user who should receive this answer:')
     return SEND_ANSWER
 
 async def send_answer(update, context):
@@ -486,7 +486,7 @@ async def send_answer(update, context):
 
     req = requests.post(url, headers=headers, json=data)
     if req.status_code == 201:
-        await context.bot.send_message(id_number_tel, text=f'Admin Answer:{message_answer}')
+        await context.bot.send_message(id_number_tel, text=f'📬 You have received an answer from Admin:\n\n{message_answer}')
         keyboard = [['Answer'], ['Logout']]
         reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
         await update.message.reply_text("Please choose:", reply_markup=reply_markup)
@@ -527,7 +527,7 @@ def main():
             REGISTER_CREATE: [MessageHandler(filters.TEXT & ~filters.COMMAND, register_create)],
 
             ID_TICKET: [MessageHandler(filters.TEXT & ~filters.COMMAND, id_ticket)],
-            SUBJECT: [MessageHandler(filters.TEXT & ~filters.COMMAND, subjcet)],
+            SUBJECT: [MessageHandler(filters.TEXT & ~filters.COMMAND, subject)],
             MESSAGE: [MessageHandler(filters.TEXT & ~filters.COMMAND, message)],
             SEND_ANSWER: [MessageHandler(filters.TEXT & ~filters.COMMAND, send_answer)],
             ADMIN_HANDLER: [MessageHandler(filters.TEXT & ~filters.COMMAND, admin_handler)],
