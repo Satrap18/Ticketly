@@ -253,12 +253,21 @@ async def create_ticket(update, context):
         success = await send_ticket_request(user_id, update, context, company_name, comment)
         if success:
             await context.bot.send_message(chat_id, 'Ticket created!')
+            keyboard = [['Ticket'], ['Logout']]
+            reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+            await update.message.reply_text("Please choose:", reply_markup=reply_markup)
             return MAIN_HANDLER
         else:
             await context.bot.send_message(chat_id, 'Could not create ticket, try again later.')
+            keyboard = [['Ticket'], ['Logout']]
+            reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+            await update.message.reply_text("Please choose:", reply_markup=reply_markup)            
             return MAIN_HANDLER
     except Exception as e:
         await context.bot.send_message(chat_id, f'Try again later. Error: {e}')
+        keyboard = [['Ticket'], ['Logout']]
+        reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+        await update.message.reply_text("Please choose:", reply_markup=reply_markup)
         return MAIN_HANDLER
 
 
@@ -355,9 +364,22 @@ async def register_password(update, context):
     try:
         success = await register_create(first_name, last_name, email, username, password)
         if success:
+            await update.message.delete()
             await context.bot.send_message(chat_id, "Your account has been created successfully! \n now login your account!")
+            keyboard = [['Login'], ['Signup']]
+            reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+            await context.bot.send_message(chat_id=chat_id,
+                                    text='Please choose:',
+                                    reply_markup=reply_markup)
+            return ACCOUNT 
         else:
             await context.bot.send_message(chat_id, "I could not create the account, there is a problem, try again")
+            keyboard = [['Login'], ['Signup']]
+            reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+            await context.bot.send_message(chat_id=chat_id,
+                                    text='Please choose:',
+                                    reply_markup=reply_markup)
+            return ACCOUNT 
         return ACCOUNT
     except Exception as e:
         await context.bot.send_message(chat_id, f"Error: {e}")
@@ -462,8 +484,16 @@ async def send_answer(update, context):
     req = requests.post(url, headers=headers, json=data)
     if req.status_code == 201:
         await context.bot.send_message(id_number_tel, text=f'Admin Answer:{message_answer}')
+        keyboard = [['Answer'], ['Logout']]
+        reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+        await update.message.reply_text("Please choose:", reply_markup=reply_markup)
+        return ACCOUNT
     else:
         await context.bot.send_message(ADMIN_ID, 'Erorr!')
+        keyboard = [['Answer'], ['Logout']]
+        reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+        await update.message.reply_text("Please choose:", reply_markup=reply_markup)
+        return ACCOUNT
 
 # End Answer Ticket #
 async def cancel(update, context):
