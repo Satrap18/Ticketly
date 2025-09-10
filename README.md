@@ -84,6 +84,13 @@ Swagger UI → http://127.0.0.1:8000/api/docs/
 
 OpenAPI Schema → http://127.0.0.1:8000/api/schema/
 
+---
+🎥 Demo  
+![Signup Demo](img/signup.gif)  
+![Login Demo](img/login.gif)  
+![Ticket Demo](img/ticket.gif)  
+![Answer Demo](img/answer.gif)  
+![Website Demo](img/website.gif)  
 
 
 ---
@@ -98,18 +105,15 @@ OpenAPI Schema → http://127.0.0.1:8000/api/schema/
 
 ---
 
-📝 TODO
+## 📝 TODO / Roadmap  
 
-[ ] Write unit and API tests
-
-[ ] Add rate limiting to prevent spam
-
-[ ] Support ticket categories and priorities
-
-[ ] Dockerize the project
-
-[ ] Add CI/CD (GitHub Actions)
-
+- [x] User authentication & registration  
+- [x] Ticket creation via Telegram  
+- [ ] Write unit and API tests  
+- [ ] Add rate limiting to prevent spam  
+- [ ] Support ticket categories and priorities  
+- [ ] Dockerize the project  
+- [ ] Add CI/CD (GitHub Actions)  
 
 
 ---
