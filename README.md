@@ -136,3 +136,5 @@ Here's a quick overview of how the app works:
 [MohammadReza Karimi](https://github.com/Satrap18)
 
 
+### License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
